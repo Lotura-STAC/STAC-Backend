@@ -33,11 +33,16 @@ const users = [
 const login = (id, pw) => {
     let len = users.length;
 
-    for (let i = 0; i < len; i++) {
-        if (id === users[i].id && pw === users[i].pw) return id;
-    }
-
-    return "";
+    connection.query(`SELECT id FROM user WHERE id = ?, pw = ?;`, [id,pw], function (error, results) {
+        if (error) {
+            console.log('no matching user blyat');
+            console.log(error);
+            return "";
+        }
+        
+        console.log(results);
+        return id;
+    });
 };
 
 // access token을 secret key 기반으로 생성
