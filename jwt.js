@@ -43,7 +43,7 @@ const login = (id, pw) => {
         console.log(results);
         return id;
     });
-    return login_db;
+    //return login_db;
 };
 
 // access token을 secret key 기반으로 생성
