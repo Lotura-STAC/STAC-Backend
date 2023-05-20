@@ -33,7 +33,7 @@ const users = [
 const login = (id, pw) => {
     let len = users.length;
 
-    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
+    let login_db = connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
@@ -43,6 +43,7 @@ const login = (id, pw) => {
         console.log(results);
         return id;
     });
+    return login_db;
 };
 
 // access token을 secret key 기반으로 생성
