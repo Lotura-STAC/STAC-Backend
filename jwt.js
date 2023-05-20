@@ -81,7 +81,7 @@ app.post("/login", (req, res) => {
     let pw = req.body.pw;
 
     let user = login(id, pw);
-    if (user == "") return res.sendStatus(500);
+    if (user === "") return res.sendStatus(500);
 
     let accessToken = generateAccessToken(user);
     let refreshToken = generateRefreshToken(user);
