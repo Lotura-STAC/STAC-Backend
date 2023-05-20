@@ -33,7 +33,7 @@ const users = [
 const login = (id, pw) => {
     let query_data = "";
 
-    
+
     return query_data;
 };
 
@@ -72,19 +72,22 @@ app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
 
-    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
+    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id, pw], function (error, results) {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
             return res.sendStatus(500);
         }
         console.log(results);
-        console.log(" ");
-        console.log(results.length);
-        //return res.sendStatus(500);
-        let accessToken = generateAccessToken(user);
-        let refreshToken = generateRefreshToken(user);
-        res.json({ accessToken, refreshToken });
+        if (results.length < 1) {
+            return res.sendStatus(500);
+        }
+        else {
+            let accessToken = generateAccessToken(results[0].id);
+            let refreshToken = generateRefreshToken(results[0].id);
+            res.json({ accessToken, refreshToken });
+        }
+
     });
 });
 
@@ -103,7 +106,7 @@ const authenticateAccessToken = (req, res, next) => {
             console.log(error);
             return res.sendStatus(403);
         }
-        
+
         req.user = user;
         next();
     });
