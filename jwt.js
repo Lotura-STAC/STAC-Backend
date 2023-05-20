@@ -33,15 +33,7 @@ const users = [
 const login = (id, pw) => {
     let query_data = "";
 
-    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
-        if (error) {
-            console.log('no matching user blyat');
-            console.log(error);
-            query_data = "";
-        }
-        console.log(results);
-        query_data = results[0].id;
-    });
+    
     return query_data;
 };
 
@@ -80,15 +72,20 @@ app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
 
-    let user = login(id, pw);
-    console.log("user:");
-    console.log(user);
-    if (user === "") return res.sendStatus(500);
-
-    let accessToken = generateAccessToken(user);
-    let refreshToken = generateRefreshToken(user);
-
-    res.json({ accessToken, refreshToken });
+    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
+        if (error) {
+            console.log('no matching user blyat');
+            console.log(error);
+            return res.sendStatus(500);
+        }
+        console.log(results);
+        console.log(" ");
+        console.log(results.length);
+        //return res.sendStatus(500);
+        let accessToken = generateAccessToken(user);
+        let refreshToken = generateRefreshToken(user);
+        res.json({ accessToken, refreshToken });
+    });
 });
 
 // access token의 유효성 검사
