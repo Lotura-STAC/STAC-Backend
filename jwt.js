@@ -31,19 +31,18 @@ const users = [
 
 // 로그인 id, pw 확인
 const login = (id, pw) => {
-    let len = users.length;
+    const query_data = "";
 
-    let login_db = connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
+    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
-            return "";
+            query_data = "";
         }
-        
         console.log(results);
-        return id;
+        query_data = results;
     });
-    //return login_db;
+    return query_data;
 };
 
 // access token을 secret key 기반으로 생성
@@ -82,7 +81,7 @@ app.post("/login", (req, res) => {
     let pw = req.body.pw;
 
     let user = login(id, pw);
-    if (user === "") return res.sendStatus(500);
+    if (user == "") return res.sendStatus(500);
 
     let accessToken = generateAccessToken(user);
     let refreshToken = generateRefreshToken(user);
