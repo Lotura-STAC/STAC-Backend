@@ -31,7 +31,7 @@ const users = [
 
 // 로그인 id, pw 확인
 const login = (id, pw) => {
-    const query_data = "";
+    let query_data = "";
 
     connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
         if (error) {
