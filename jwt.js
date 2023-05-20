@@ -23,19 +23,6 @@ const connection = mysql.createConnection({
     database: dbsettings.db
 });
 
-// 임시 id, pw 배열
-const users = [
-    { id: "hello", pw: "world" },
-    { id: "good", pw: "bye" },
-];
-
-// 로그인 id, pw 확인
-const login = (id, pw) => {
-    let query_data = "";
-
-
-    return query_data;
-};
 
 // access token을 secret key 기반으로 생성
 const generateAccessToken = (id) => {
@@ -133,7 +120,7 @@ app.post("/refresh", (req, res) => {
 // access token 유효성 확인을 위한 예시 요청
 app.get("/user", authenticateAccessToken, (req, res) => {
     console.log(req.user);
-    res.json(users.filter((user) => user.id === req.user.id));
+    res.sendStatus(200);
 });
 
 server.listen(PORT, () => {
