@@ -33,7 +33,7 @@ const users = [
 const login = (id, pw) => {
     let len = users.length;
 
-    connection.query(`SELECT id FROM user WHERE id = ?, pw = ?;`, [id,pw], function (error, results) {
+    connection.query(`SELECT id FROM user WHERE id = ? AND pw = ?;`, [id,pw], function (error, results) {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
