@@ -40,7 +40,7 @@ const login = (id, pw) => {
             query_data = "";
         }
         console.log(results);
-        query_data = results;
+        query_data = results[0].id;
     });
     return query_data;
 };
@@ -81,7 +81,7 @@ app.post("/login", (req, res) => {
     let pw = req.body.pw;
 
     let user = login(id, pw);
-    console.log("\n");
+    console.log("user:");
     console.log(user);
     if (user === "") return res.sendStatus(500);
 
