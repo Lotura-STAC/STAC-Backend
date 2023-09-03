@@ -18,7 +18,9 @@ const options = {
 
 const app = express();
 const server = http.createServer(app);
-const PORT = 8080;
+
+const http_port = 8080;
+const https_port = 443;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -252,6 +254,10 @@ android.on('connection', socket => {
     })
 })
 
-server.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
+server.listen(http_port, () => {
+    console.log(`Server running on ${http_port}`);
 });
+
+https.listen(https_port, () => {
+    console.log(`Listening to port ${https_port}`)
+})
