@@ -193,7 +193,7 @@ android.on('connection', socket => {
                         return;
                     }
                     console.log(results);
-                    android.emit('Send_Coord', results)
+                    android.emit('update', results)
                 });
             }
         });
