@@ -12,8 +12,8 @@ const fs = require('fs');
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
 const options = {
-    key: fs.readFileSync('./privkey.pem'),
-    cert: fs.readFileSync('./cert.pem')
+    key: fs.readFileSync('./localhost-key.pem'),
+    cert: fs.readFileSync('./localhost.pem')
 };
 
 const app = express();
