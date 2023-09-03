@@ -5,9 +5,16 @@ const http = require("http");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
+const fcm = require('firebase-admin')
+const fs = require('fs');
 //const { request } = require("../session-practice/db");
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
+
+const options = {
+    key: fs.readFileSync('./privkey.pem'),
+    cert: fs.readFileSync('./cert.pem')
+};
 
 const app = express();
 const server = http.createServer(app);
@@ -15,6 +22,10 @@ const PORT = 8080;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+const https = require('https').createServer(options, app);
+const io = require('socket.io')(https)
+const android = io.of('/app');
 
 const connection = mysql.createConnection({
     host: dbsettings.host,
@@ -53,7 +64,7 @@ app.post("/sign", (req, res) => {
         }
         //중복이면 return
         if (results.length > 0) {
-            res.sendStatus(202);
+            res.status(400).send('중복된 ID입니다.');
             return;
         } else {//중복 아니면 DB에 ID,PW등록
             connection.query(`INSERT INTO user (id, pw) VALUES (?,?);`, [id, pw], (insert_error, insert_results) => {
@@ -80,11 +91,11 @@ app.post("/login", (req, res) => {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
-            return res.sendStatus(500);
+            return res.status(500).send('로그인 실패.');
         }
         console.log(results);
         if (results.length < 1) {
-            return res.sendStatus(500);
+            res.status(500).send('비밀번호 오류입니다.')
         }
         else {
             let accessToken = generateAccessToken(results[0].id);
@@ -129,7 +140,7 @@ app.post("/refresh", (req, res) => {
 
             const accessToken = generateAccessToken(user.id);
 
-            res.json({ accessToken });
+            res.json({ accessToken,refreshToken });
         }
     );
 });
@@ -139,6 +150,107 @@ app.get("/user", authenticateAccessToken, (req, res) => {
     console.log(req.user);
     res.sendStatus(200);
 });
+
+android.on('connection', socket => {
+    console.log('Socket.IO Connected(andriod):', socket.id)
+    socket.on('Socket_login', login_data => {
+        const { accesstoken, user_id } = login_data;
+        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                console.log(error);
+            }
+            console.log(user_id);
+            console.log(",");
+            console.log(user);
+            if (user.id == user_id) {
+                connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user_id, socket.id], (insert_error, insert_results) => {
+                    if (insert_error) {
+                        console.log(insert_error);
+                        return;
+                    }
+                    console.log(insert_results);
+                });
+            }
+        });
+    })
+    socket.on('request_data_all', request_data => {
+        const { user_id, accesstoken } = request_data;
+        //Application과 Frontend에 현재 상태 DB 넘기기
+        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                console.log(error);
+            }
+            console.log(user_id);
+            console.log(",");
+            console.log(user);
+            if (user.id == user_id) {
+                connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user_id], function (error, results) {
+                    if (error) {
+                        console.log('SELECT * FROM device_data error');
+                        console.log(error);
+                        return;
+                    }
+                    console.log(results);
+                    android.emit('Send_Coord', results)
+                });
+            }
+        });
+    })
+    socket.on('Add_Device', request_data => {
+        const { user_id, accesstoken, device_no, device_type } = request_data;
+        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                console.log(error);
+            }
+            console.log(user_id);
+            console.log(",");
+            console.log(user);
+            if (user.id == user_id) {
+                connection.query(`INSERT INTO device_data (user_id, device_no, device_type, curr_status) VALUES (?, ?, ?, ?);`, [user_id, device_no, device_type, "0"], (error, results) => {
+                    if (error) {
+                        console.log('INSERT INTO device_data error:');
+                        console.log(error);
+                        return;
+                    }
+                    console.log(results);
+                    console.log('device_data insert Success')
+                });
+            }
+        });
+    })
+    socket.on('Remove_Device', request_data => {
+        const { user_id, accesstoken, device_no } = request_data;
+        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                console.log(error);
+            }
+            console.log(user_id);
+            console.log(",");
+            console.log(user);
+            if (user.id == user_id) {
+                connection.query(`DELETE FROM device_data WHERE user_id = ? AND device_no = ?;`, [user_id, device_no], (error, results) => {
+                    if (error) {
+                        console.log('DELETE FROM device_data error:');
+                        console.log(error);
+                        return;
+                    }
+                    console.log(results);
+                    console.log('device_data delete Success')
+                });
+            }
+        });
+    })
+    socket.on('disconnect', function () {
+        console.log("SOCKETIO disconnect EVENT: ", socket.id, " client disconnect");
+        connection.query(`DELETE FROM user_socketid WHERE socket_id = ?;`, [socket.id], (error, results) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            console.log(results);
+        });
+    })
+})
 
 server.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
