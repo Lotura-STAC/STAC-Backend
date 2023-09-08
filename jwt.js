@@ -19,7 +19,7 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 const app = express();
 const server = http.createServer(app);
 
-const http_port = 8080;
+const http_port = 80;
 const https_port = 443;
 
 app.use(bodyParser.urlencoded({ extended: false }));
