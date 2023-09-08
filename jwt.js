@@ -11,10 +11,10 @@ const fs = require('fs');
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
-const options = {
-    key: fs.readFileSync('./localhost-key.pem'),
-    cert: fs.readFileSync('./localhost.pem')
-};
+//const options = {
+//    key: fs.readFileSync('./localhost-key.pem'),
+//    cert: fs.readFileSync('./localhost.pem')
+//};
 
 const app = express();
 const server = http.createServer(app);
@@ -25,8 +25,8 @@ const https_port = 443;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const https = require('https').createServer(options, app);
-const io = require('socket.io')(https)
+//const https = require('https').createServer(options, app);
+const io = require('socket.io')(server)
 const android = io.of('/app');
 
 const connection = mysql.createConnection({
@@ -258,6 +258,6 @@ server.listen(http_port, () => {
     console.log(`Server running on ${http_port}`);
 });
 
-https.listen(https_port, () => {
-    console.log(`Listening to port ${https_port}`)
-})
+//https.listen(https_port, () => {
+//    console.log(`Listening to port ${https_port}`)
+//})
