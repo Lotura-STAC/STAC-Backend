@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //const https = require('https').createServer(options, app);
-const io = require('socket.io')(server)
+const io = require('socket.io')(server, { cors: { origin: "*" } })
 const android = io.of('/app');
 
 const connection = mysql.createConnection({
