@@ -199,7 +199,7 @@ android.on('connection', socket => {
         });
     })
     socket.on('Add_Device', request_data => {
-        const { user_id, accesstoken, device_no, device_type } = request_data;
+        const { user_id, name, accesstoken, device_no, device_type } = request_data;
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
                 console.log(error);
@@ -208,7 +208,7 @@ android.on('connection', socket => {
             console.log(",");
             console.log(user);
             if (user.id == user_id) {
-                connection.query(`INSERT INTO device_data (user_id, device_no, device_type, curr_status) VALUES (?, ?, ?, ?);`, [user_id, device_no, device_type, "0"], (error, results) => {
+                connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
                     if (error) {
                         console.log('INSERT INTO device_data error:');
                         console.log(error);
