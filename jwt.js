@@ -149,23 +149,19 @@ app.post("/refresh", (req, res) => {
     );
 });
 
-// // 장치 추가
-// app.post("/add_device", (req, res) => {
-//     let refreshToken = req.body.refreshToken;
-//     if (!refreshToken) return res.sendStatus(401);
-
-//     jwt.verify(
-//         refreshToken,
-//         process.env.REFRESH_TOKEN_SECRET,
-//         (error, user) => {
-//             if (error) return res.sendStatus(403);
-
-//             const accessToken = generateAccessToken(user.id);
-
-//             res.json({ accessToken,refreshToken });
-//         }
-//     );
-// });
+// 장치 추가
+app.post("/add_device", authenticateAccessToken, (req, res) => {
+    let name = req.body.name;
+    let accesstoken = req.body.accesstoken;
+    let device_no = req.body.device_no;
+    let device_type = req.body.device_type;
+    console.log(req.user);
+    console.log(name);
+    console.log(accesstoken);
+    console.log(device_no);
+    console.log(device_type);
+    res.sendStatus(200);
+});
 
 // access token 유효성 확인을 위한 예시 요청
 app.get("/user", authenticateAccessToken, (req, res) => {
