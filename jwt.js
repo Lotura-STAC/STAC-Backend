@@ -154,18 +154,25 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
     let name = req.body.name;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
-    connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [req.user.id, name, device_no, device_type, "0"], (error, results) => {
-        if (error) {
-            console.log('INSERT INTO device_data error:');
-            console.log(error);
-            res.sendStatus(500);
+
+    connection.query(`SELECT device_no FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
+        if (results.length > 0) {
+            res.status(400).send('이미 추가된 장치입니다.');
             return;
+        }else{
+            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [req.user.id, name, device_no, device_type, "0"], (error, results) => {
+                if (error) {
+                    console.log('INSERT INTO device_data error:');
+                    console.log(error);
+                    res.status(400).send('디바이스 추가 실패');
+                    return;
+                }
+                console.log(results);
+                console.log('device_data insert Success')
+                res.status(200).send('디바이스 추가 성공');
+            });
         }
-        console.log(results);
-        console.log('device_data insert Success')
-        res.sendStatus(200);
-    });
-    
+    });    
 });
 
 // access token 유효성 확인을 위한 예시 요청
