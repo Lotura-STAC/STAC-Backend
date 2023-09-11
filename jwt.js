@@ -152,15 +152,20 @@ app.post("/refresh", (req, res) => {
 // 장치 추가
 app.post("/add_device", authenticateAccessToken, (req, res) => {
     let name = req.body.name;
-    let accesstoken = req.body.accesstoken;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
-    console.log(req.user.id);
-    console.log(name);
-    console.log(accesstoken);
-    console.log(device_no);
-    console.log(device_type);
-    res.sendStatus(200);
+    connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [req.user.id, name, device_no, device_type, "0"], (error, results) => {
+        if (error) {
+            console.log('INSERT INTO device_data error:');
+            console.log(error);
+            res.sendStatus(500);
+            return;
+        }
+        console.log(results);
+        console.log('device_data insert Success')
+        res.sendStatus(200);
+    });
+    
 });
 
 // access token 유효성 확인을 위한 예시 요청
@@ -218,30 +223,30 @@ android.on('connection', socket => {
             }
         });
     })
-    socket.on('Add_Device', request_data => {
-        const { user_id, name, accesstoken, device_no, device_type } = request_data;
-        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
-            if (error) {
-                console.log(error);
-                res.status(400).send('Token Expired');
-                return;
-            }
-            console.log(user_id);
-            console.log(",");
-            console.log(user);
-            if (user.id == user_id) {
-                connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
-                    if (error) {
-                        console.log('INSERT INTO device_data error:');
-                        console.log(error);
-                        return;
-                    }
-                    console.log(results);
-                    console.log('device_data insert Success')
-                });
-            }
-        });
-    })
+    // socket.on('Add_Device', request_data => {
+    //     const { user_id, name, accesstoken, device_no, device_type } = request_data;
+    //     jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+    //         if (error) {
+    //             console.log(error);
+    //             res.status(400).send('Token Expired');
+    //             return;
+    //         }
+    //         console.log(user_id);
+    //         console.log(",");
+    //         console.log(user);
+    //         if (user.id == user_id) {
+    //             connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
+    //                 if (error) {
+    //                     console.log('INSERT INTO device_data error:');
+    //                     console.log(error);
+    //                     return;
+    //                 }
+    //                 console.log(results);
+    //                 console.log('device_data insert Success')
+    //             });
+    //         }
+    //     });
+    // })
     socket.on('Remove_Device', request_data => {
         const { user_id, accesstoken, device_no } = request_data;
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
