@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const fcm = require('firebase-admin')
 const fs = require('fs');
+const cors = require('cors');
 //const { request } = require("../session-practice/db");
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
@@ -17,6 +18,7 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 //};
 
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 
 const http_port = 80;
@@ -146,6 +148,24 @@ app.post("/refresh", (req, res) => {
         }
     );
 });
+
+// // 장치 추가
+// app.post("/add_device", (req, res) => {
+//     let refreshToken = req.body.refreshToken;
+//     if (!refreshToken) return res.sendStatus(401);
+
+//     jwt.verify(
+//         refreshToken,
+//         process.env.REFRESH_TOKEN_SECRET,
+//         (error, user) => {
+//             if (error) return res.sendStatus(403);
+
+//             const accessToken = generateAccessToken(user.id);
+
+//             res.json({ accessToken,refreshToken });
+//         }
+//     );
+// });
 
 // access token 유효성 확인을 위한 예시 요청
 app.get("/user", authenticateAccessToken, (req, res) => {
