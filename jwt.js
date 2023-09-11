@@ -215,7 +215,7 @@ app.get("/user", authenticateAccessToken, (req, res) => {
 android.on('connection', socket => {
     console.log('Socket.IO Connected(andriod):', socket.id)
     socket.on('request_data_all', request_data => {
-        const { user_id, accesstoken } = request_data;
+        const { accesstoken } = request_data;
         //Application과 Frontend에 현재 상태 DB 넘기기
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
@@ -223,30 +223,15 @@ android.on('connection', socket => {
                 res.status(400).send('Token Expired');
                 return;
             }
-            console.log(user_id);
-            console.log(",");
-            console.log(user);
-            if (user.id == user_id) {
-                connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user_id], function (error, results) {
-                    if (error) {
-                        console.log('SELECT * FROM device_data error');
-                        console.log(error);
-                        return;
-                    }
-                    console.log(results);
-                    android.emit('update', results)
-                });
-            }
-        });
-    })
-    socket.on('disconnect', function () {
-        console.log("SOCKETIO disconnect EVENT: ", socket.id, " client disconnect");
-        connection.query(`DELETE FROM user_socketid WHERE socket_id = ?;`, [socket.id], (error, results) => {
-            if (error) {
-                console.log(error);
-                return;
-            }
-            console.log(results);
+            connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user.id], function (error, results) {
+                if (error) {
+                    console.log('SELECT * FROM device_data error');
+                    console.log(error);
+                    return;
+                }
+                console.log(results);
+                android.emit('update', results)
+            });
         });
     })
 })
