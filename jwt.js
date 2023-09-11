@@ -208,7 +208,7 @@ android.on('connection', socket => {
             console.log(",");
             console.log(user);
             if (user.id == user_id) {
-                connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
+                connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
                     if (error) {
                         console.log('INSERT INTO device_data error:');
                         console.log(error);
