@@ -40,7 +40,7 @@ const connection = mysql.createConnection({
 // access token을 secret key 기반으로 생성
 const generateAccessToken = (id) => {
     return jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "15m",
+        expiresIn: "3 days",
     });
 };
 
