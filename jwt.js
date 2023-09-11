@@ -160,6 +160,8 @@ android.on('connection', socket => {
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
                 console.log(error);
+                res.status(400).send('Token Expired');
+                return;
             }
             console.log(user_id);
             console.log(",");
@@ -181,6 +183,8 @@ android.on('connection', socket => {
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
                 console.log(error);
+                res.status(400).send('Token Expired');
+                return;
             }
             console.log(user_id);
             console.log(",");
@@ -203,6 +207,8 @@ android.on('connection', socket => {
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
                 console.log(error);
+                res.status(400).send('Token Expired');
+                return;
             }
             console.log(user_id);
             console.log(",");
@@ -225,6 +231,8 @@ android.on('connection', socket => {
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
             if (error) {
                 console.log(error);
+                res.status(400).send('Token Expired');
+                return;
             }
             console.log(user_id);
             console.log(",");
