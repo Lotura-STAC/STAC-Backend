@@ -144,7 +144,7 @@ app.post("/refresh", (req, res) => {
 
             const accessToken = generateAccessToken(user.id);
 
-            res.json({ accessToken,refreshToken });
+            res.json({ accessToken, refreshToken });
         }
     );
 });
@@ -159,11 +159,11 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
         if (results.length > 0) {
             res.status(400).send('이미 추가된 장치입니다.');
             return;
-        }else{
+        } else {
             connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [req.user.id, name, device_no, device_type, "0"], (error, results) => {
                 if (error) {
                     console.log('INSERT INTO device_data error:');
-                    console.log(error);
+                    //console.log(error);
                     res.status(400).send('디바이스 추가 실패');
                     return;
                 }
@@ -172,7 +172,22 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
                 res.status(200).send('디바이스 추가 성공');
             });
         }
-    });    
+    });
+});
+
+// 장치 제거
+app.post("/remove_device", authenticateAccessToken, (req, res) => {
+    let device_no = req.body.device_no;
+    connection.query(`DELETE FROM device_data WHERE user_id = ? AND device_no = ?;`, [req.user.id, device_no], (error, results) => {
+        if (error) {
+            console.log('DELETE FROM device_data error:');
+            //console.log(error);
+            res.status(400).send('디바이스 제거 실패');
+            return;
+        }
+        console.log('device_data delete Success')
+        res.status(200).send('디바이스 제거 성공');
+    });
 });
 
 // access token 유효성 확인을 위한 예시 요청
@@ -183,28 +198,6 @@ app.get("/user", authenticateAccessToken, (req, res) => {
 
 android.on('connection', socket => {
     console.log('Socket.IO Connected(andriod):', socket.id)
-    socket.on('Socket_login', login_data => {
-        const { accesstoken, user_id } = login_data;
-        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
-            if (error) {
-                console.log(error);
-                res.status(400).send('Token Expired');
-                return;
-            }
-            console.log(user_id);
-            console.log(",");
-            console.log(user);
-            if (user.id == user_id) {
-                connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user_id, socket.id], (insert_error, insert_results) => {
-                    if (insert_error) {
-                        console.log(insert_error);
-                        return;
-                    }
-                    console.log(insert_results);
-                });
-            }
-        });
-    })
     socket.on('request_data_all', request_data => {
         const { user_id, accesstoken } = request_data;
         //Application과 Frontend에 현재 상태 DB 넘기기
@@ -226,54 +219,6 @@ android.on('connection', socket => {
                     }
                     console.log(results);
                     android.emit('update', results)
-                });
-            }
-        });
-    })
-    // socket.on('Add_Device', request_data => {
-    //     const { user_id, name, accesstoken, device_no, device_type } = request_data;
-    //     jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
-    //         if (error) {
-    //             console.log(error);
-    //             res.status(400).send('Token Expired');
-    //             return;
-    //         }
-    //         console.log(user_id);
-    //         console.log(",");
-    //         console.log(user);
-    //         if (user.id == user_id) {
-    //             connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [user_id, name, device_no, device_type, "0"], (error, results) => {
-    //                 if (error) {
-    //                     console.log('INSERT INTO device_data error:');
-    //                     console.log(error);
-    //                     return;
-    //                 }
-    //                 console.log(results);
-    //                 console.log('device_data insert Success')
-    //             });
-    //         }
-    //     });
-    // })
-    socket.on('Remove_Device', request_data => {
-        const { user_id, accesstoken, device_no } = request_data;
-        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
-            if (error) {
-                console.log(error);
-                res.status(400).send('Token Expired');
-                return;
-            }
-            console.log(user_id);
-            console.log(",");
-            console.log(user);
-            if (user.id == user_id) {
-                connection.query(`DELETE FROM device_data WHERE user_id = ? AND device_no = ?;`, [user_id, device_no], (error, results) => {
-                    if (error) {
-                        console.log('DELETE FROM device_data error:');
-                        console.log(error);
-                        return;
-                    }
-                    console.log(results);
-                    console.log('device_data delete Success')
                 });
             }
         });
