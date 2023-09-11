@@ -155,7 +155,7 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
     let accesstoken = req.body.accesstoken;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
-    console.log(req.user);
+    console.log(req.user.id);
     console.log(name);
     console.log(accesstoken);
     console.log(device_no);
