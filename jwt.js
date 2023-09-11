@@ -164,12 +164,12 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
                 if (error) {
                     console.log('INSERT INTO device_data error:');
                     //console.log(error);
-                    res.status(400).send('디바이스 추가 실패');
+                    res.status(400).send('장치 추가 실패');
                     return;
                 }
                 console.log(results);
                 console.log('device_data insert Success')
-                res.status(200).send('디바이스 추가 성공');
+                res.status(200).send('장치 추가 성공');
             });
         }
     });
@@ -182,11 +182,27 @@ app.post("/remove_device", authenticateAccessToken, (req, res) => {
         if (error) {
             console.log('DELETE FROM device_data error:');
             //console.log(error);
-            res.status(400).send('디바이스 제거 실패');
+            res.status(400).send('장치 제거 실패');
             return;
         }
         console.log('device_data delete Success')
-        res.status(200).send('디바이스 제거 성공');
+        res.status(200).send('장치 제거 성공');
+    });
+});
+
+// 장치 이름 변경
+app.post("/rename_device", authenticateAccessToken, (req, res) => {
+    let device_no = req.body.device_no;
+    let new_name = req.body.new_name;
+    connection.query(`UPDATE device_data SET name = ? WHERE device_no = ?;`, [new_name, device_no], (error, results) => {
+        if (error) {
+            console.log('device_data Update query error:');
+            //console.log(error);
+            res.status(400).send('장치 이름 변경 실패');
+            return;
+        }
+        console.log('device_data update success');
+        res.status(200).send('장치 이름 변경 성공');
     });
 });
 
