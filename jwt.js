@@ -154,8 +154,8 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
     let name = req.body.name;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
-    let x_pos = req.body.x_pos;
-    let y_pos = req.body.y_pos;
+    let x_pos = 0;
+    let y_pos = 0;
 
     connection.query(`SELECT device_no FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
         if (results.length > 0) {
@@ -205,6 +205,23 @@ app.post("/rename_device", authenticateAccessToken, (req, res) => {
         }
         console.log('device_data update success');
         res.status(200).send('장치 이름 변경 성공');
+    });
+});
+
+// 장치 위치 변경
+app.post("/move_device", authenticateAccessToken, (req, res) => {
+    let device_no = req.body.device_no;
+    let x_pos_new = req.body.x_pos;
+    let y_pos_new = req.body.y_pos;
+    connection.query(`UPDATE device_data SET x_pos = ?, y_pos = ? WHERE device_no = ?;`, [x_pos_new, y_pos_new, device_no], (error, results) => {
+        if (error) {
+            console.log('device_data Update query error:');
+            //console.log(error);
+            res.status(400).send('장치 위치 변경 실패');
+            return;
+        }
+        console.log('device_data update success');
+        res.status(200).send('장치 위치 변경 성공');
     });
 });
 
