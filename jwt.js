@@ -154,13 +154,15 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
     let name = req.body.name;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
+    let x_pos = req.body.x_pos;
+    let y_pos = req.body.y_pos;
 
     connection.query(`SELECT device_no FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
         if (results.length > 0) {
             res.status(400).send('이미 추가된 장치입니다.');
             return;
         } else {
-            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status) VALUES (?, ?, ?, ?, ?);`, [req.user.id, name, device_no, device_type, "0"], (error, results) => {
+            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ? ,?);`, [req.user.id, name, device_no, device_type, "0", x_pos, y_pos], (error, results) => {
                 if (error) {
                     console.log('INSERT INTO device_data error:');
                     //console.log(error);
@@ -213,7 +215,10 @@ app.get("/user", authenticateAccessToken, (req, res) => {
 });
 
 io.on('connection', socket => {
-    console.log('Socket.IO Connected:', socket.id)
+    console.log('Socket.IO Gateway Connected:', socket.id)
+    socket.on('device_update', request_data => {
+        const {device_no, curr_status} = request_data;
+    })
 })
 
 android.on('connection', socket => {
