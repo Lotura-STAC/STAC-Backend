@@ -239,7 +239,7 @@ android.on('connection', socket => {
         });
     })
     socket.on('socket_login', request_data => {
-        console.log(socket.handshake.auth.token)
+        console.log(socket.handshake.query.token)
     })
 })
 
