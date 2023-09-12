@@ -238,6 +238,9 @@ android.on('connection', socket => {
             });
         });
     })
+    socket.on('socket_login', request_data => {
+        console.log(socket.handshake.auth.token)
+    })
 })
 
 server.listen(http_port, () => {
