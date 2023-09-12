@@ -78,7 +78,7 @@ app.post("/sign", (req, res) => {
                     res.sendStatus(500);
                     return;
                 }
-                console.log(insert_results);
+                //console.log(insert_results);
                 res.sendStatus(200);
             });
         }
@@ -97,7 +97,7 @@ app.post("/login", (req, res) => {
             console.log(error);
             return res.status(500).send('로그인 실패.');
         }
-        console.log(results);
+        //console.log(results);
         if (results.length < 1) {
             res.status(500).send('비밀번호 오류입니다.')
         }
@@ -167,7 +167,7 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
                     res.status(400).send('장치 추가 실패');
                     return;
                 }
-                console.log(results);
+                //console.log(results);
                 console.log('device_data insert Success')
                 res.status(200).send('장치 추가 성공');
             });
@@ -233,13 +233,41 @@ android.on('connection', socket => {
                     console.log(error);
                     return;
                 }
-                console.log(results);
+                //console.log(results);
                 android.emit('update', results)
             });
         });
     })
-    socket.on('socket_login', request_data => {
-        console.log(socket.handshake.query.token)
+
+    socket.on('socket_login', login_data => {
+        const { accesstoken } = login_data;
+        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                console.log(error);
+                console.log('Token Expired');
+                return;
+            }
+            connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user.id, socket.id], (insert_error, insert_results) => {
+                if (insert_error) {
+                    console.log(insert_error);
+                    return;
+                }
+                //console.log(insert_results);
+                console.log('Socket Login');
+            });
+        });
+    })
+
+    socket.on('disconnect', function () {
+        console.log("SOCKETIO disconnect EVENT: ", socket.id, " client disconnect");
+        connection.query(`DELETE FROM user_socketid WHERE socket_id = ?;`, [socket.id], (error, results) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            //console.log(results);
+            console.log('Socket Disconnected');
+        });
     })
 })
 
