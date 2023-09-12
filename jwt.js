@@ -117,7 +117,7 @@ const authenticateAccessToken = (req, res, next) => {
 
     if (!token) {
         console.log("wrong token format or token is not sended");
-        return res.sendStatus(400);
+        return res.sendStatus(401);
     }
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
@@ -211,6 +211,10 @@ app.get("/user", authenticateAccessToken, (req, res) => {
     console.log(req.user);
     res.sendStatus(200);
 });
+
+io.on('connection', socket => {
+    console.log('Socket.IO Connected:', socket.id)
+})
 
 android.on('connection', socket => {
     console.log('Socket.IO Connected(andriod):', socket.id)
