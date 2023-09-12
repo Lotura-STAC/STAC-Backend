@@ -227,6 +227,14 @@ android.on('connection', socket => {
                 res.status(400).send('Token Expired');
                 return;
             }
+            connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user.id, socket.id], (insert_error, insert_results) => {
+                if (insert_error) {
+                    console.log(insert_error);
+                    return;
+                }
+                //console.log(insert_results);
+                console.log('Socket Login');
+            });
             connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user.id], function (error, results) {
                 if (error) {
                     console.log('SELECT * FROM device_data error');
@@ -235,25 +243,6 @@ android.on('connection', socket => {
                 }
                 //console.log(results);
                 android.emit('update', results)
-            });
-        });
-    })
-
-    socket.on('socket_login', login_data => {
-        const { accesstoken } = login_data;
-        jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
-            if (error) {
-                console.log(error);
-                console.log('Token Expired');
-                return;
-            }
-            connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user.id, socket.id], (insert_error, insert_results) => {
-                if (insert_error) {
-                    console.log(insert_error);
-                    return;
-                }
-                //console.log(insert_results);
-                console.log('Socket Login');
             });
         });
     })
