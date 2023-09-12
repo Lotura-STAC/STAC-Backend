@@ -154,15 +154,13 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
     let name = req.body.name;
     let device_no = req.body.device_no;
     let device_type = req.body.device_type;
-    let x_pos = 0;
-    let y_pos = 0;
 
     connection.query(`SELECT device_no FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
         if (results.length > 0) {
             res.status(400).send('이미 추가된 장치입니다.');
             return;
         } else {
-            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ? ,?);`, [req.user.id, name, device_no, device_type, "0", x_pos, y_pos], (error, results) => {
+            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ? ,?);`, [req.user.id, name, device_no, device_type, "0", "0", "0"], (error, results) => {
                 if (error) {
                     console.log('INSERT INTO device_data error:');
                     //console.log(error);
