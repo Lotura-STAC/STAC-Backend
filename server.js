@@ -115,7 +115,7 @@ app.post("/login", (req, res) => {
             console.log(error);
             return res.status(500).send('로그인 실패.');
         }
-        console.log(admin_results);
+        console.log(admin_results[0].id);
         if (admin_results.length < 1) {
             res.status(500).send('비밀번호 오류입니다.')
         } else {
