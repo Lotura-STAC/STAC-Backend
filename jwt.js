@@ -232,7 +232,7 @@ app.get("/user", authenticateAccessToken, (req, res) => {
 io.on('connection', socket => {
     console.log('Socket.IO Gateway Connected:', socket.id)
     socket.on('device_update', request_data => {
-        const {device_no, curr_status} = request_data;
+        const { device_no, curr_status } = request_data;
     })
 })
 
@@ -254,15 +254,15 @@ android.on('connection', socket => {
                 }
                 //console.log(insert_results);
                 console.log('Socket Login');
-            });
-            connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user.id], function (error, results) {
-                if (error) {
-                    console.log('SELECT * FROM device_data error');
-                    console.log(error);
-                    return;
-                }
-                //console.log(results);
-                android.emit('update', results)
+                connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user.id], function (error, results) {
+                    if (error) {
+                        console.log('SELECT * FROM device_data error');
+                        console.log(error);
+                        return;
+                    }
+                    //console.log(results);
+                    android.emit('update', results)
+                });
             });
         });
     })
