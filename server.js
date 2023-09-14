@@ -262,7 +262,8 @@ android.on('connection', socket => {
                         return;
                     }
                     //console.log(results);
-                    android.emit('update', results)
+                    android.to(socket.id).emit('update', results);
+                    //android.emit('update', results)
                 });
             });
         });
