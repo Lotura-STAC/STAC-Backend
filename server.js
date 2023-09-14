@@ -104,22 +104,22 @@ app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
 
-    connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, results) {
+    connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, admin_results) {
         if (error) {
             console.log('no matching user blyat');
             console.log(error);
             return res.status(500).send('로그인 실패.');
         }
         //console.log(results);
-        if (results.length < 1) {
-            connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, results) {
+        if (admin_results.length < 1) {
+            connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
                 if (error) {
                     console.log('no matching user blyat');
                     console.log(error);
                     return res.status(500).send('로그인 실패.');
                 }
                 //console.log(results);
-                if (results.length < 1) {
+                if (guest_results.length < 1) {
                     res.status(500).send('비밀번호 오류입니다.')
                 }
                 else {
@@ -128,13 +128,11 @@ app.post("/login", (req, res) => {
                     res.json({ accessToken, refreshToken });
                 }
             });
-        }
-        else {
+        }else {
             let accessToken = generateAccessToken(results[0].id);
             let refreshToken = generateRefreshToken(results[0].id);
             res.json({ accessToken, refreshToken });
         }
-
     });
 });
 
