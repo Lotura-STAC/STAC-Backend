@@ -110,7 +110,7 @@ app.post("/login", (req, res) => {
             console.log(error);
             return res.status(500).send('로그인 실패.');
         }
-        //console.log(results);
+        console.log(admin_results.length);
         if (admin_results.length < 1) {
             connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
                 if (error) {
