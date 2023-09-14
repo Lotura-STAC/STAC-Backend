@@ -30,6 +30,11 @@ app.use(bodyParser.json());
 //const https = require('https').createServer(options, app);
 const io = require('socket.io')(server, { cors: { origin: "*" } })
 const android = io.of('/app');
+//const serAccount = require('./firebase_token.json')
+
+// fcm.initializeApp({
+//     credential: fcm.credential.cert(serAccount),
+// })
 
 const connection = mysql.createConnection({
     host: dbsettings.host,
@@ -112,25 +117,32 @@ app.post("/login", (req, res) => {
         }
         console.log(admin_results.length);
         if (admin_results.length < 1) {
-            connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
-                if (error) {
-                    console.log('no matching user blyat');
-                    console.log(error);
-                    return res.status(500).send('로그인 실패.');
-                }
-                //console.log(results);
-                if (guest_results.length < 1) {
-                    res.status(500).send('비밀번호 오류입니다.')
-                }
-                else {
-                    let accessToken = generateAccessToken(guest_results[0].id);
-                    let refreshToken = generateRefreshToken(guest_results[0].id);
-                    res.json({ accessToken, refreshToken });
-                }
-            });
-        }else {
+            res.status(500).send('비밀번호 오류입니다.')
+        } else {
             let accessToken = generateAccessToken(admin_results[0].id);
             let refreshToken = generateRefreshToken(admin_results[0].id);
+            res.json({ accessToken, refreshToken });
+        }
+    });
+});
+
+// login 요청 및 성공시 access token, refresh token 발급
+app.post("/login_guest", (req, res) => {
+    let id = req.body.id;
+    let pw = req.body.pw;
+    connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
+        if (error) {
+            console.log('no matching user blyat');
+            console.log(error);
+            return res.status(500).send('로그인 실패.');
+        }
+        //console.log(results);
+        if (guest_results.length < 1) {
+            res.status(500).send('비밀번호 오류입니다.')
+        }
+        else {
+            let accessToken = generateAccessToken(guest_results[0].id);
+            let refreshToken = generateRefreshToken(guest_results[0].id);
             res.json({ accessToken, refreshToken });
         }
     });
@@ -246,6 +258,20 @@ app.post("/move_device", authenticateAccessToken, (req, res) => {
         }
         console.log('device_data update success');
         res.status(200).send('장치 위치 변경 성공');
+    });
+});
+
+app.post("/notify_me", authenticateAccessToken, (req, res) => {
+    let deviceToken = req.body.deviceToken;
+    let device_no = req.body.device_no;
+    connection.query(`INSERT INTO PushAlert (Token, device_id) VALUES (?, ?, ?, ?);`, [deviceToken, device_no], (error, results) => {
+        if (error) {
+            console.log('deviceStatus Update query error:');
+            console.log(error);
+            return;
+        }
+        //console.log(results);
+        console.log('Push Request Success')
     });
 });
 
