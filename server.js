@@ -257,7 +257,7 @@ app.post("/move_device", authenticateAccessToken, (req, res) => {
 app.post("/notify_me", authenticateAccessToken, (req, res) => {
     let deviceToken = req.body.deviceToken;
     let device_no = req.body.device_no;
-    connection.query(`INSERT INTO PushAlert (Token, device_id) VALUES (?, ?, ?, ?);`, [deviceToken, device_no], (error, results) => {
+    connection.query(`INSERT INTO PushAlert (Token, device_id) VALUES (?, ?);`, [deviceToken, device_no], (error, results) => {
         if (error) {
             console.log('deviceStatus Update query error:');
             console.log(error);
