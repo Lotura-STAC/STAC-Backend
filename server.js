@@ -55,11 +55,12 @@ const generateRefreshToken = (id) => {
 
 // 회원가입 DB에 저장
 app.post("/sign", (req, res) => {
-    let id = req.body.id;
-    let pw = req.body.pw;
-
+    let admin_id = req.body.admin_id;
+    let admin_pw = req.body.admin_pw;
+    let guest_id = req.body.guest_id;
+    let guest_pw = req.body.guest_pw;
     //DB에 중복되는 값 있는지 확인
-    connection.query(`SELECT id FROM user WHERE id = ?;`, [id], function (error, results) {
+    connection.query(`SELECT admin_id FROM user WHERE admin_id = ?;`, [admin_id], function (error, admin_results) {
         let type = new Array();
         if (error) {
             console.log('SELECT id FROM user WHERE id = ? Error');
@@ -67,19 +68,31 @@ app.post("/sign", (req, res) => {
             return;
         }
         //중복이면 return
-        if (results.length > 0) {
-            res.status(400).send('중복된 ID입니다.');
+        if (admin_results.length > 0) {
+            res.status(400).send('중복된 Admin ID입니다.');
             return;
         } else {//중복 아니면 DB에 ID,PW등록
-            connection.query(`INSERT INTO user (id, pw) VALUES (?,?);`, [id, pw], (insert_error, insert_results) => {
+            connection.query(`SELECT guest_id FROM user WHERE guest_id = ?;`, [guest_id], (insert_error, guest_results) => {
                 if (insert_error) {
-                    console.log('User Insert Error');
-                    console.log(insert_error);
-                    res.sendStatus(500);
+                    console.log('SELECT id FROM user WHERE id = ? Error');
+                    console.log(error);
                     return;
                 }
-                //console.log(insert_results);
-                res.sendStatus(200);
+                if (admin_results.length > 0) {
+                    res.status(400).send('중복된 Guest ID입니다.');
+                    return;
+                } else {
+                    connection.query(`INSERT INTO user (admin_id, admin_pw, guest_id, guest_pw) VALUES (?,?,?,?);`, [admin_id, admin_pw, guest_id, guest_pw], (insert_error, insert_results) => {
+                        if (insert_error) {
+                            console.log('User Insert Error');
+                            console.log(insert_error);
+                            res.sendStatus(500);
+                            return;
+                        }
+                        //console.log(insert_results);
+                        res.sendStatus(200);
+                    });
+                }
             });
         }
     });
