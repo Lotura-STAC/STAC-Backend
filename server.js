@@ -130,13 +130,13 @@ app.post("/login", (req, res) => {
                 else {
                     let accessToken = generateAccessToken(guest_results[0].guest_id);
                     let refreshToken = generateRefreshToken(guest_results[0].guest_id);
-                    res.json({ accessToken, refreshToken });
+                    res.json({ accessToken, refreshToken, "role":"guest"});
                 }
             });
         }else {
             let accessToken = generateAccessToken(admin_results[0].admin_id);
             let refreshToken = generateRefreshToken(admin_results[0].admin_id);
-            res.json({ accessToken, refreshToken });
+            res.json({ accessToken, refreshToken, "role":"admin"});
         }
     });
 });
