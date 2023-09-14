@@ -30,11 +30,11 @@ app.use(bodyParser.json());
 //const https = require('https').createServer(options, app);
 const io = require('socket.io')(server, { cors: { origin: "*" } })
 const android = io.of('/app');
-//const serAccount = require('./firebase_token.json')
+const serAccount = require('./firebase_token.json')
 
-// fcm.initializeApp({
-//     credential: fcm.credential.cert(serAccount),
-// })
+fcm.initializeApp({
+    credential: fcm.credential.cert(serAccount),
+})
 
 const connection = mysql.createConnection({
     host: dbsettings.host,
@@ -266,6 +266,44 @@ app.post("/notify_me", authenticateAccessToken, (req, res) => {
         //console.log(results);
         console.log('Push Request Success')
     });
+});
+
+app.post("/notify_test", authenticateAccessToken, (req, res) => {
+    let deviceToken = req.body.deviceToken;
+    let target_tokens = new Array();
+    target_tokens[0] = deviceToken;
+    let message = {
+        notification: {
+            title: '인간실격',
+            body: `부끄럼 많은 삶을 살았습니다.`,
+        },
+        tokens: target_tokens,
+        android: {
+            priority: "high"
+        },
+        apns: {
+            payload: {
+                aps: {
+                    contentAvailable: true,
+                }
+            }
+        }
+    }
+    //FCM 메시지 보내기
+    fcm.messaging().sendMulticast(message)
+        .then((response) => {
+            if (response.failureCount > 0) {
+                const failedTokens = [];
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        failedTokens.push(target_tokens[idx]);
+                    }
+                });
+                console.log('List of tokens that caused failures: ' + failedTokens);
+            }
+            console.log('FCM Success')
+            return
+        });
 });
 
 // access token 유효성 확인을 위한 예시 요청
