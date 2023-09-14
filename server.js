@@ -123,14 +123,14 @@ app.post("/login", (req, res) => {
                     res.status(500).send('비밀번호 오류입니다.')
                 }
                 else {
-                    let accessToken = generateAccessToken(results[0].id);
-                    let refreshToken = generateRefreshToken(results[0].id);
+                    let accessToken = generateAccessToken(guest_results[0].id);
+                    let refreshToken = generateRefreshToken(guest_results[0].id);
                     res.json({ accessToken, refreshToken });
                 }
             });
         }else {
-            let accessToken = generateAccessToken(results[0].id);
-            let refreshToken = generateRefreshToken(results[0].id);
+            let accessToken = generateAccessToken(admin_results[0].id);
+            let refreshToken = generateRefreshToken(admin_results[0].id);
             res.json({ accessToken, refreshToken });
         }
     });
