@@ -300,6 +300,7 @@ android.on('connection', socket => {
                 res.status(400).send('Token Expired');
                 return;
             }
+            console.log(user.id);
             connection.query(`INSERT INTO user_socketid (user_id, socket_id) VALUES (?,?);`, [user.id, socket.id], (insert_error, insert_results) => {
                 if (insert_error) {
                     console.log(insert_error);
