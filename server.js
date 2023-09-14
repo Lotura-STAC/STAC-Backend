@@ -239,6 +239,7 @@ io.on('connection', socket => {
 android.on('connection', socket => {
     console.log('Socket.IO Connected(andriod):', socket.id)
     socket.on('request_data_all', request_data => {
+        console.log('Request Data Received');
         const { accesstoken } = request_data;
         //Application과 Frontend에 현재 상태 DB 넘기기
         jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
