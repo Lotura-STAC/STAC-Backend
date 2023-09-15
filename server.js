@@ -51,51 +51,55 @@ app.post("/sign", (req, res) => {
     let admin_pw = req.body.admin_pw;
     let guest_id = req.body.guest_id;
     let guest_pw = req.body.guest_pw;
-    //DB에 Admin ID 중복되는 값 있는지 확인
-    connection.query(`SELECT admin_id FROM user WHERE admin_id = ?;`, [admin_id], function (error, admin_results) {
-        let type = new Array();
-        if (error) {
-            console.log('SELECT id FROM user WHERE id = ? Error');
-            console.log(error);
-            return;
-        }
-        //중복이면 return
-        if (admin_results.length > 0) {
-            res.status(400).send('중복된 Admin ID입니다.');
-            return;
-        } else {//DB에 Guest ID 중복되는 값 있는지 확인
-            connection.query(`SELECT guest_id FROM user WHERE guest_id = ?;`, [guest_id], (insert_error, guest_results) => {
-                if (insert_error) {
-                    console.log('SELECT id FROM user WHERE id = ? Error');
-                    console.log(error);
-                    return;
-                }
-                //중복이면 return
-                if (admin_results.length > 0) {
-                    res.status(400).send('중복된 Guest ID입니다.');
-                    return;
-                } else {
-                    connection.query(`INSERT INTO user (admin_id, admin_pw, guest_id, guest_pw) VALUES (?,?,?,?);`, [admin_id, admin_pw, guest_id, guest_pw], (insert_error, insert_results) => {
-                        if (insert_error) {
-                            console.log('User Insert Error');
-                            console.log(insert_error);
-                            res.sendStatus(500);
-                            return;
-                        }
-                        //console.log(insert_results);
-                        res.sendStatus(200);
-                    });
-                }
-            });
-        }
-    });
+    if ((id == '' || id == null || id == undefined) && (pw == '' || pw == null || pw == undefined)) {
+        res.status(500).send('회원가입 실패.');
+    } else {
+        //DB에 Admin ID 중복되는 값 있는지 확인
+        connection.query(`SELECT admin_id FROM user WHERE admin_id = ?;`, [admin_id], function (error, admin_results) {
+            let type = new Array();
+            if (error) {
+                console.log('SELECT id FROM user WHERE id = ? Error');
+                console.log(error);
+                return;
+            }
+            //중복이면 return
+            if (admin_results.length > 0) {
+                res.status(400).send('중복된 Admin ID입니다.');
+                return;
+            } else {//DB에 Guest ID 중복되는 값 있는지 확인
+                connection.query(`SELECT guest_id FROM user WHERE guest_id = ?;`, [guest_id], (insert_error, guest_results) => {
+                    if (insert_error) {
+                        console.log('SELECT id FROM user WHERE id = ? Error');
+                        console.log(error);
+                        return;
+                    }
+                    //중복이면 return
+                    if (admin_results.length > 0) {
+                        res.status(400).send('중복된 Guest ID입니다.');
+                        return;
+                    } else {
+                        connection.query(`INSERT INTO user (admin_id, admin_pw, guest_id, guest_pw) VALUES (?,?,?,?);`, [admin_id, admin_pw, guest_id, guest_pw], (insert_error, insert_results) => {
+                            if (insert_error) {
+                                console.log('User Insert Error');
+                                console.log(insert_error);
+                                res.sendStatus(500);
+                                return;
+                            }
+                            //console.log(insert_results);
+                            res.sendStatus(200);
+                        });
+                    }
+                });
+            }
+        });
+    }
 });
 
 // 로그인 API
 app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
-    if (id == '' && pw == '') {
+    if ((id == '' || id == null || id == undefined) && (pw == '' || pw == null || pw == undefined)) {
         return res.status(500).send('로그인 실패.');
     } else {
         connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, admin_results) {
