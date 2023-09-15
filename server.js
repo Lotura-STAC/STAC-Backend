@@ -95,7 +95,7 @@ app.post("/sign", (req, res) => {
 app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
-    if (id == null && pw == null) {
+    if (id == '' && pw == '') {
         return res.status(500).send('로그인 실패.');
     } else {
         connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, admin_results) {
