@@ -321,7 +321,16 @@ io.on('connection', socket => {
         const { device_no, curr_status } = request_data;
         console.log(device_no);
         console.log(curr_status);
-        if(curr_status == 0)//ON
+
+        connection.query(`UPDATE device_data SET curr_status = ? WHERE device_no = ?;`, [curr_status, device_no], function (error, results) {
+            if (error) {
+                console.log('UPDATE device_data device_data error');
+                console.log(error);
+                return;
+            }
+        });
+
+        if (curr_status == 0)//ON
         {
             connection.query(`UPDATE device_data SET ON_time = ? WHERE device_no = ?;`, [moment().format(), device_no], (error, results) => {
                 if (error) {
@@ -331,7 +340,7 @@ io.on('connection', socket => {
                 }
                 //console.log(results);
             });
-        }else{//OFF
+        } else {//OFF
             connection.query(`UPDATE device_data SET OFF_time = ? WHERE device_no = ?;`, [moment().format(), device_no], (error, results) => {
                 if (error) {
                     console.log('deviceStatus Update query error:');
@@ -341,31 +350,25 @@ io.on('connection', socket => {
                 //console.log(results);
             });
         }
-        connection.query(`UPDATE device_data SET curr_status = ? WHERE device_no = ?;`, [curr_status, device_no], function (error, results) {
+
+        //console.log(results);
+        connection.query(`SELECT user_id, guest_id FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
             if (error) {
-                console.log('UPDATE device_data device_data error');
                 console.log(error);
-                return;
             }
-            //console.log(results);
-            connection.query(`SELECT user_id, guest_id FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
+            connection.query(`SELECT socket_id FROM user_socketid WHERE user_id = ? OR user_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, socket_id_results) {
                 if (error) {
                     console.log(error);
                 }
-                connection.query(`SELECT socket_id FROM user_socketid WHERE user_id = ? OR user_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, socket_id_results) {
+                connection.query(`SELECT * FROM device_data WHERE user_id = ? OR guest_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, device_results) {
                     if (error) {
+                        console.log('SELECT * FROM device_data error');
                         console.log(error);
+                        return;
                     }
-                    connection.query(`SELECT * FROM device_data WHERE user_id = ? OR guest_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, device_results) {
-                        if (error) {
-                            console.log('SELECT * FROM device_data error');
-                            console.log(error);
-                            return;
-                        }
-                        for (let i = 0; i < socket_id_results.length; i++) {
-                            android.to(socket_id_results[i].socket_id).emit('update', device_results);
-                        }
-                    });
+                    for (let i = 0; i < socket_id_results.length; i++) {
+                        android.to(socket_id_results[i].socket_id).emit('update', device_results);
+                    }
                 });
             });
         });
@@ -416,7 +419,7 @@ io.on('connection', socket => {
         //                             }
         //                         }
         //                     }
-        
+
         //                     //FCM 메시지 보내기
         //                     fcm.messaging().sendMulticast(message)
         //                         .then((response) => {
@@ -451,7 +454,7 @@ io.on('connection', socket => {
         //                             }
         //                         }
         //                     }
-        
+
         //                     //FCM 메시지 보내기
         //                     fcm.messaging().sendMulticast(message)
         //                         .then((response) => {
@@ -467,7 +470,7 @@ io.on('connection', socket => {
         //                             console.log('FCM Success')
         //                             return
         //                         });
-        
+
         //                 }
         //             });
         //         });
