@@ -286,7 +286,7 @@ io.on('connection', socket => {
                 return;
             }
             //console.log(device_data_results);
-            if (device_data_results.length < 1) {
+            if (device_data_results.length >= 1) {
                 connection.query(`UPDATE device_data SET curr_status = ? WHERE device_no = ?;`, [curr_status, device_no], function (error, results) {
                     if (error) {
                         console.log('UPDATE device_data device_data error');
