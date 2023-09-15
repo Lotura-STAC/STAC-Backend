@@ -173,10 +173,22 @@ app.post("/refresh", (req, res) => {
         process.env.REFRESH_TOKEN_SECRET,
         (error, user) => {
             if (error) return res.sendStatus(403);
-
             const accessToken = generateAccessToken(user.id);
-
-            res.json({ accessToken, refreshToken });
+            connection.query(`SELECT admin_id FROM user WHERE admin_id = ?;`, [user.id], function (error, a_results) {
+                if (a_results.length > 0) {
+                    res.json({ accessToken, refreshToken ,"role":"admin"});
+                    return;
+                } else {
+                    connection.query(`SELECT guest_id FROM user WHERE guest_id = ?;`, [user.id], function (error, g_results) {
+                        if (g_results.length > 0) {
+                            res.json({ accessToken, refreshToken ,"role":"guest"});
+                            return;
+                        } else {
+                            res.json({ accessToken, refreshToken});
+                        }
+                    });
+                }
+            });
         }
     );
 });
