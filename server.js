@@ -130,13 +130,13 @@ app.post("/login", (req, res) => {
                 else {
                     let accessToken = generateAccessToken(guest_results[0].guest_id);
                     let refreshToken = generateRefreshToken(guest_results[0].guest_id);
-                    res.json({ accessToken, refreshToken, "role":"guest"});
+                    res.json({ accessToken, refreshToken, "role": "guest" });
                 }
             });
-        }else {
+        } else {
             let accessToken = generateAccessToken(admin_results[0].admin_id);
             let refreshToken = generateRefreshToken(admin_results[0].admin_id);
-            res.json({ accessToken, refreshToken, "role":"admin"});
+            res.json({ accessToken, refreshToken, "role": "admin" });
         }
     });
 });
@@ -191,16 +191,18 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
             res.status(400).send('이미 추가된 장치입니다.');
             return;
         } else {
-            connection.query(`INSERT INTO device_data (user_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ? ,?);`, [req.user.id, name, device_no, device_type, "0", "0", "0"], (error, results) => {
-                if (error) {
-                    console.log('INSERT INTO device_data error:');
-                    //console.log(error);
-                    res.status(400).send('장치 추가 실패');
-                    return;
-                }
-                //console.log(results);
-                console.log('device_data insert Success')
-                res.status(200).send('장치 추가 성공');
+            connection.query(`SELECT guest_id FROM user WHERE admin_id = ?;`, [req.user.id], function (error, guestid_results) {
+                connection.query(`INSERT INTO device_data (user_id, guest_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ?, ? ,?);`, [req.user.id, guestid_results[0].guest_id, name, device_no, device_type, "0", "0", "0"], (error, results) => {
+                    if (error) {
+                        console.log('INSERT INTO device_data error:');
+                        //console.log(error);
+                        res.status(400).send('장치 추가 실패');
+                        return;
+                    }
+                    //console.log(results);
+                    console.log('device_data insert Success')
+                    res.status(200).send('장치 추가 성공');
+                });
             });
         }
     });
@@ -316,6 +318,34 @@ io.on('connection', socket => {
     console.log('Socket.IO Gateway Connected:', socket.id)
     socket.on('device_update', request_data => {
         const { device_no, curr_status } = request_data;
+        connection.query(`UPDATE device_data SET curr_status = ? WHERE device_no = ?;`, [curr_status, device_no], function (error, results) {
+            if (error) {
+                console.log('UPDATE device_data device_data error');
+                console.log(error);
+                return;
+            }
+            //console.log(results);
+            connection.query(`SELECT user_id, guest_id FROM device_data WHERE device_no = ?;`, [device_no], function (error, results) {
+                if (error) {
+                    console.log(error);
+                }
+                connection.query(`SELECT socket_id FROM user_socketid WHERE user_id = ? OR user_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, socket_id_results) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    connection.query(`SELECT * FROM device_data WHERE user_id = ? OR guest_id = ?;`, [results[0].user_id, results[0].guest_id], function (error, device_results) {
+                        if (error) {
+                            console.log('SELECT * FROM device_data error');
+                            console.log(error);
+                            return;
+                        }
+                        for (let i = 0; i < socket_id_results.length; i++) {
+                            android.to(socket_id_results[i].socket_id).emit('update', device_results);
+                        }
+                    });
+                });
+            });
+        });
     })
 })
 
@@ -339,7 +369,7 @@ android.on('connection', socket => {
                 }
                 //console.log(insert_results);
                 console.log('Socket Login');
-                connection.query(`SELECT * FROM device_data WHERE user_id = ?;`, [user.id], function (error, results) {
+                connection.query(`SELECT * FROM device_data WHERE user_id = ? OR guest_id = ?;`, [user.id, user.id], function (error, results) {
                     if (error) {
                         console.log('SELECT * FROM device_data error');
                         console.log(error);
