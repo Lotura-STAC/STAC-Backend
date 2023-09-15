@@ -95,39 +95,42 @@ app.post("/sign", (req, res) => {
 app.post("/login", (req, res) => {
     let id = req.body.id;
     let pw = req.body.pw;
-
-    connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, admin_results) {
-        if (error) {
-            console.log('no matching user blyat');
-            console.log(error);
-            return res.status(500).send('로그인 실패.');
-        }
-        //console.log(admin_results);
-        if (admin_results.length < 1) {
-            connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
-                if (error) {
-                    console.log('no matching user blyat');
-                    console.log(error);
-                    return res.status(500).send('로그인 실패.');
-                }
-                //console.log(guest_results);
-                if (guest_results.length < 1) {
-                    res.status(500).send('비밀번호 오류입니다.')
-                }
-                else {
-                    //JWT 토큰 발급-게스트
-                    let accessToken = generateAccessToken(guest_results[0].guest_id);
-                    let refreshToken = generateRefreshToken(guest_results[0].guest_id);
-                    res.json({ accessToken, refreshToken, "role": "guest" });
-                }
-            });
-        } else {
-            //JWT 토큰 발급-어드민
-            let accessToken = generateAccessToken(admin_results[0].admin_id);
-            let refreshToken = generateRefreshToken(admin_results[0].admin_id);
-            res.json({ accessToken, refreshToken, "role": "admin" });
-        }
-    });
+    if (id == null && pw == null) {
+        return res.status(500).send('로그인 실패.');
+    } else {
+        connection.query(`SELECT admin_id FROM user WHERE admin_id = ? AND admin_pw = ?;`, [id, pw], function (error, admin_results) {
+            if (error) {
+                console.log('no matching user blyat');
+                console.log(error);
+                return res.status(500).send('로그인 실패.');
+            }
+            //console.log(admin_results);
+            if (admin_results.length < 1) {
+                connection.query(`SELECT guest_id FROM user WHERE guest_id = ? AND guest_pw = ?;`, [id, pw], function (error, guest_results) {
+                    if (error) {
+                        console.log('no matching user blyat');
+                        console.log(error);
+                        return res.status(500).send('로그인 실패.');
+                    }
+                    //console.log(guest_results);
+                    if (guest_results.length < 1) {
+                        res.status(500).send('비밀번호 오류입니다.')
+                    }
+                    else {
+                        //JWT 토큰 발급-게스트
+                        let accessToken = generateAccessToken(guest_results[0].guest_id);
+                        let refreshToken = generateRefreshToken(guest_results[0].guest_id);
+                        res.json({ accessToken, refreshToken, "role": "guest" });
+                    }
+                });
+            } else {
+                //JWT 토큰 발급-어드민
+                let accessToken = generateAccessToken(admin_results[0].admin_id);
+                let refreshToken = generateRefreshToken(admin_results[0].admin_id);
+                res.json({ accessToken, refreshToken, "role": "admin" });
+            }
+        });
+    }
 });
 
 // JWT 토큰 유효성 검사
