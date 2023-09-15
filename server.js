@@ -319,7 +319,8 @@ io.on('connection', socket => {
     console.log('Socket.IO Gateway Connected:', socket.id)
     socket.on('device_update', request_data => {
         const { device_no, curr_status } = request_data;
-        console.log(request_data);
+        console.log(device_no);
+        console.log(curr_status);
         if(curr_status == 0)//ON
         {
             connection.query(`UPDATE device_data SET ON_time = ? WHERE device_no = ?;`, [moment().format(), device_no], (error, results) => {
