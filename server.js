@@ -276,6 +276,45 @@ app.post("/notify_me", authenticateAccessToken, (req, res) => {
     });
 });
 
+//FCM 테스트 코드
+app.post("/notify_test", authenticateAccessToken, (req, res) => {
+    let deviceToken = req.body.deviceToken;
+    let target_tokens = new Array();
+    target_tokens[0] = deviceToken;
+    let message = {
+        notification: {
+            title: '인간실격',
+            body: `부끄럼 많은 삶을 살았습니다.`,
+        },
+        tokens: target_tokens,
+        android: {
+            priority: "high"
+        },
+        apns: {
+            payload: {
+                aps: {
+                    contentAvailable: true,
+                }
+            }
+        }
+    }
+    //FCM 메시지 보내기
+    fcm.messaging().sendMulticast(message)
+        .then((response) => {
+            if (response.failureCount > 0) {
+                const failedTokens = [];
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        failedTokens.push(target_tokens[idx]);
+                    }
+                });
+                console.log('List of tokens that caused failures: ' + failedTokens);
+            }
+            console.log('FCM Success')
+            return
+        });
+});
+
 //임베디드 Gateway 연결 Socket
 io.on('connection', socket => {
     console.log('Socket.IO Gateway Connected:', socket.id)
