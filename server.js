@@ -51,7 +51,7 @@ app.post("/sign", (req, res) => {
     let admin_pw = req.body.admin_pw;
     let guest_id = req.body.guest_id;
     let guest_pw = req.body.guest_pw;
-    if ((admin_id == '' || admin_id == null || admin_id == undefined || guest_id == '' || guest_id == null || guest_id == undefined) && (admin_pw == '' || admin_pw == null || admin_pw == undefined || guest_pw == '' || guest_pw == null || guest_pw == undefined)) {
+    if ((admin_id == '' || admin_id == null || admin_id == undefined) && (admin_pw == '' || admin_pw == null || admin_pw == undefined)) {
         res.status(500).send('회원가입 실패.');
     } else {
         //DB에 Admin ID 중복되는 값 있는지 확인
