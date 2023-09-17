@@ -315,6 +315,36 @@ app.post("/notify_test", authenticateAccessToken, (req, res) => {
         });
 });
 
+//권한 확인 API 
+app.post("/whoami", authenticateAccessToken, (req, res) => {
+    connection.query(`SELECT admin_id FROM user WHERE admin_id = ?;`, [req.user.id], function (error, admin_results) {
+        if (error) {
+            console.log('no matching user blyat');
+            console.log(error);
+            return res.status(500).send('로그인 실패.');
+        }
+        //console.log(admin_results);
+        if (admin_results.length < 1) {
+            connection.query(`SELECT guest_id FROM user WHERE guest_id = ?;`, [req.user.id], function (error, guest_results) {
+                if (error) {
+                    console.log('no matching user blyat');
+                    console.log(error);
+                    return res.status(500).send('로그인 실패.');
+                }
+                //console.log(guest_results);
+                if (guest_results.length < 1) {
+                    res.status(500).send('ID 오류입니다.')
+                }
+                else {
+                    res.json({"role": "guest" });
+                }
+            });
+        } else {
+            res.json({"role": "admin" });
+        }
+    });
+});
+
 //임베디드 Gateway 연결 Socket
 io.on('connection', socket => {
     console.log('Socket.IO Gateway Connected:', socket.id)
