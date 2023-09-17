@@ -74,7 +74,7 @@ app.post("/sign", (req, res) => {
                         return;
                     }
                     //중복이면 return
-                    if (admin_results.length > 0) {
+                    if (guest_results.length > 0) {
                         res.status(400).send('중복된 Guest ID입니다.');
                         return;
                     } else {
