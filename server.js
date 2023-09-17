@@ -291,6 +291,37 @@ app.post("/notify_me", authenticateAccessToken, (req, res) => {
     });
 });
 
+//어드민 알림 신청 API 
+app.post("/notify_me_admin", authenticateAccessToken, (req, res) => {
+    let deviceToken = req.body.deviceToken;
+    connection.query(`SELECT Token FROM PushAlert_Admin WHERE Token = ?;`, [deviceToken], function (error, results) {
+        let type = new Array();
+        if (error) {
+            console.log('SELECT Token query error:');
+            console.log(error);
+            return;
+        }
+        //중복이면 return
+        if (results.length > 0) {
+            console.log('This is a duplicate value');
+            res.status(400).send('중복된 신청입니다');
+            return;
+        } else {
+            connection.query(`INSERT INTO PushAlert_Admin (admin_id, Token) VALUES (?, ?);`, [req.user.id, deviceToken], (error, results) => {
+                if (error) {
+                    console.log('deviceStatus Update query error:');
+                    //console.log(error);
+                    res.status(400).send('알림 신청 실패');
+                    return;
+                }
+                //console.log(results);
+                console.log('Push Request Success')
+                res.status(200).send('알림 신청 성공');
+            });
+        }
+    });
+});
+
 //FCM 테스트 코드
 app.post("/notify_test", authenticateAccessToken, (req, res) => {
     let deviceToken = req.body.deviceToken;
