@@ -263,16 +263,31 @@ app.post("/move_device", authenticateAccessToken, (req, res) => {
 app.post("/notify_me", authenticateAccessToken, (req, res) => {
     let deviceToken = req.body.deviceToken;
     let device_no = req.body.device_no;
-    connection.query(`INSERT INTO PushAlert (Token, device_id, expect_status) VALUES (?, ?, ?);`, [deviceToken, device_no, "1"], (error, results) => {
+    connection.query(`SELECT Token FROM PushAlert WHERE device_id = ? AND expect_status = ? AND Token = ?;`, [device_no, "1", deviceToken], function (error, results) {
+        let type = new Array();
         if (error) {
-            console.log('deviceStatus Update query error:');
-            //console.log(error);
-            res.status(400).send('알림 신청 실패');
+            console.log('SELECT Token query error:');
+            console.log(error);
             return;
         }
-        //console.log(results);
-        console.log('Push Request Success')
-        res.status(200).send('알림 신청 성공');
+        //중복이면 return
+        if (results.length > 0) {
+            console.log('This is a duplicate value');
+            res.status(400).send('중복된 신청입니다');
+            return;
+        } else {
+            connection.query(`INSERT INTO PushAlert (Token, device_id, expect_status) VALUES (?, ?, ?);`, [deviceToken, device_no, "1"], (error, results) => {
+                if (error) {
+                    console.log('deviceStatus Update query error:');
+                    //console.log(error);
+                    res.status(400).send('알림 신청 실패');
+                    return;
+                }
+                //console.log(results);
+                console.log('Push Request Success')
+                res.status(200).send('알림 신청 성공');
+            });
+        }
     });
 });
 
@@ -336,11 +351,11 @@ app.post("/whoami", authenticateAccessToken, (req, res) => {
                     res.status(500).send('ID 오류입니다.')
                 }
                 else {
-                    res.json({"role": "guest" });
+                    res.json({ "role": "guest" });
                 }
             });
         } else {
-            res.json({"role": "admin" });
+            res.json({ "role": "admin" });
         }
     });
 });
