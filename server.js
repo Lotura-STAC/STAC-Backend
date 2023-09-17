@@ -322,6 +322,19 @@ app.post("/notify_me_admin", authenticateAccessToken, (req, res) => {
     });
 });
 
+//어드민 알림 제거 API 
+app.post("/no_notify_admin", authenticateAccessToken, (req, res) => {
+    connection.query(`DELETE FROM PushAlert_Admin WHERE admin_id = ?;`, [req.user.id], function (error, results) {
+        if (error) {
+            console.log('DELETE FROM PushAlert_Admin error:');
+            console.log(error);
+            res.status(200).send('알림 제거 실패');
+            return;
+        }
+        res.status(200).send('알림 제거 성공');
+    });
+});
+
 //FCM 테스트 코드
 app.post("/notify_test", authenticateAccessToken, (req, res) => {
     let deviceToken = req.body.deviceToken;
