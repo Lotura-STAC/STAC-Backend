@@ -13,6 +13,12 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
+const options = {
+    key: fs.readFileSync('./rootca.key'),
+    cert: fs.readFileSync('./rootca.crt')
+  };
+
+const https = require('https').createServer(options, app);
 const http_port = 80;
 const https_port = 443;
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,13 +26,6 @@ app.use(bodyParser.json());
 const io = require('socket.io')(https, { cors: { origin: "*" } });
 const android = io.of('/app');
 const serAccount = require('./firebase_token.json');
-
-const options = {
-    key: fs.readFileSync('./rootca.key'),
-    cert: fs.readFileSync('./rootca.crt')
-  };
-
-const https = require('https').createServer(options, app);
 
 fcm.initializeApp({
     credential: fcm.credential.cert(serAccount),
