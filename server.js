@@ -2,6 +2,7 @@ require("dotenv").config();
 const dbsettings = require('./var.js');
 const mysql = require('mysql');
 const http = require("http");
+const https = require('https');
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
@@ -14,11 +15,19 @@ const app = express();
 app.use(cors());
 const server = http.createServer(app);
 const http_port = 80;
+const https_port = 443;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const io = require('socket.io')(server, { cors: { origin: "*" } });
 const android = io.of('/app');
 const serAccount = require('./firebase_token.json');
+
+const options = {
+    key: fs.readFileSync('./rootca.key'),
+    cert: fs.readFileSync('./rootca.crt')
+  };
+
+https.createServer(options, app).listen(https_port);
 
 fcm.initializeApp({
     credential: fcm.credential.cert(serAccount),
@@ -654,4 +663,8 @@ android.on('connection', socket => {
 
 server.listen(http_port, () => {
     console.log(`Server running on ${http_port}`);
+});
+
+https.listen(https_port, () => {
+    console.log(`Server running on ${https_port}`);
 });
