@@ -664,7 +664,3 @@ android.on('connection', socket => {
 server.listen(http_port, () => {
     console.log(`Server running on ${http_port}`);
 });
-
-https.listen(https_port, () => {
-    console.log(`Server running on ${https_port}`);
-});
