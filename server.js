@@ -202,7 +202,7 @@ app.post("/add_device", authenticateAccessToken, (req, res) => {
             return;
         } else {
             connection.query(`SELECT guest_id FROM user WHERE admin_id = ?;`, [req.user.id], function (error, guestid_results) {
-                connection.query(`INSERT INTO device_data (user_id, guest_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ?, ? ,?);`, [req.user.id, guestid_results[0].guest_id, name, device_no, device_type, "0", "0", "0"], (error, results) => {
+                connection.query(`INSERT INTO device_data (user_id, guest_id, name, device_no, device_type, curr_status, x_pos, y_pos) VALUES (?, ?, ?, ?, ?, ?, ? ,?);`, [req.user.id, guestid_results[0].guest_id, name, device_no, device_type, "1", "0", "0"], (error, results) => {
                     if (error) {
                         console.log('INSERT INTO device_data error:');
                         //console.log(error);
