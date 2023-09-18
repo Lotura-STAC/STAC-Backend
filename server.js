@@ -13,7 +13,6 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
-const https = require('https').createServer(options, app);
 const http_port = 80;
 const https_port = 443;
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,7 +26,7 @@ const options = {
     cert: fs.readFileSync('./rootca.crt')
   };
 
-https.createServer(options, app).listen(https_port);
+const https = require('https').createServer(options, app);
 
 fcm.initializeApp({
     credential: fcm.credential.cert(serAccount),
